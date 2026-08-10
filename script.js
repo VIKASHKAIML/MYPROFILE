@@ -8,14 +8,14 @@
 const USER_CONFIG = {
   /* REPLACE PROFILE IMAGE HERE */
   profileImage: 'assets/profile.png',
-  
+
   /* REPLACE RESUME FILE HERE */
   resumePath: 'assets/Vikash_Kushwaha_Resume.pdf',
-  
+
   /* REPLACE SOCIAL URLS HERE */
-  linkedinUrl: 'https://linkedin.com/in/vikashkushwaha3045',
-  githubUrl: 'https://github.com/vikashkushwaha3045',
-  hackerrankUrl: 'https://hackerrank.com/vikashkushwaha3045'
+  linkedinUrl: 'https://www.linkedin.com/in/vikash-kushwaha-a6a873243?utm_source=share_via&utm_content=profile&utm_medium=member_android',
+  githubUrl: 'https://github.com/VIKASHKAIML',
+  hackerrankUrl: 'https://www.hackerrank.com/profile/vikashkushwaha33'
 };
 
 // Project Data Registry
@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCard3DTilt();
   initScrollAnimations();
   initContactForm();
+  initCopyEmail();
   initBackToTop();
 });
 
@@ -382,13 +383,13 @@ function initCard3DTilt() {
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      
+
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
-      
+
       const rotateX = (y - centerY) / 12;
       const rotateY = (centerX - x) / 12;
-      
+
       card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
     });
 
@@ -524,18 +525,19 @@ function closeProjectModal() {
 }
 
 /* ===================================================================
-   7. CONTACT FORM HANDLER WITH VALIDATION & TOAST
+   7. CONTACT FORM HANDLER WITH FORMSPREE/FORMSUBMIT AJAX & TOAST
    =================================================================== */
 function initContactForm() {
   const form = document.getElementById('contact-form');
   const nameInput = document.getElementById('contact-name');
   const emailInput = document.getElementById('contact-email');
   const msgInput = document.getElementById('contact-message');
+  const submitBtn = document.getElementById('contact-submit-btn');
   const toast = document.getElementById('toast-notification');
 
   if (!form) return;
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     let isValid = true;
 
@@ -561,17 +563,112 @@ function initContactForm() {
       isValid = false;
     }
 
-    if (isValid) {
-      // Show Success Toast
-      if (toast) {
-        toast.classList.add('show');
-        setTimeout(() => {
-          toast.classList.remove('show');
-        }, 4000);
-      }
+    if (!isValid) return;
 
-      form.reset();
+    // UI Loading state
+    const btnText = submitBtn ? submitBtn.querySelector('.btn-text') : null;
+    const btnIcon = submitBtn ? submitBtn.querySelector('.btn-icon') : null;
+    const originalText = btnText ? btnText.textContent : 'SEND MESSAGE';
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.classList.add('btn-loading');
+      if (btnText) btnText.textContent = 'SENDING MESSAGE...';
+      if (btnIcon) btnIcon.className = 'fa-solid fa-circle-notch fa-spin btn-icon';
     }
+
+    const formData = new FormData(form);
+    const formObject = {};
+    formData.forEach((value, key) => {
+      formObject[key] = value;
+    });
+
+    try {
+      // Send async AJAX request to FormSubmit endpoint
+      const response = await fetch('https://formsubmit.co/ajax/vikashkushwaha3045@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(formObject)
+      });
+
+      const data = await response.json();
+
+      if (response.ok || data.success === 'true' || data.success === true) {
+        showToast('Message Sent Successfully!', 'Thank you! Your message was delivered directly to vikashkushwaha3045@gmail.com.');
+        form.reset();
+      } else {
+        throw new Error(data.message || 'Form submission failed');
+      }
+    } catch (err) {
+      console.warn('FormSubmit AJAX error, opening mailto fallback:', err);
+      showToast('Redirecting to Mail Client...', 'Sending directly via email to vikashkushwaha3045@gmail.com', true);
+      
+      // Fallback: Open mailto link directly in user's default email program
+      const mailtoUrl = `mailto:vikashkushwaha3045@gmail.com?subject=${encodeURIComponent('Portfolio Contact from ' + nameInput.value.trim())}&body=${encodeURIComponent(msgInput.value.trim() + '\n\nSender Email: ' + emailInput.value.trim())}`;
+      setTimeout(() => {
+        window.location.href = mailtoUrl;
+      }, 1200);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('btn-loading');
+        if (btnText) btnText.textContent = originalText;
+        if (btnIcon) btnIcon.className = 'fa-solid fa-paper-plane btn-icon';
+      }
+    }
+  });
+}
+
+// Helper to show custom toast notifications
+function showToast(title, message, isError = false) {
+  const toast = document.getElementById('toast-notification');
+  if (!toast) return;
+
+  const toastTitle = toast.querySelector('.toast-title');
+  const toastMsg = toast.querySelector('.toast-msg');
+  const toastIcon = toast.querySelector('.toast-icon i');
+
+  if (toastTitle) toastTitle.textContent = title;
+  if (toastMsg) toastMsg.textContent = message;
+
+  if (isError) {
+    toast.classList.add('error');
+    if (toastIcon) toastIcon.className = 'fa-solid fa-triangle-exclamation';
+  } else {
+    toast.classList.remove('error');
+    if (toastIcon) toastIcon.className = 'fa-solid fa-circle-check';
+  }
+
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 5000);
+}
+
+/* ===================================================================
+   7.1 COPY EMAIL ADDRESS TO CLIPBOARD
+   =================================================================== */
+function initCopyEmail() {
+  const copyBtn = document.getElementById('copy-email-btn');
+  const tooltip = document.getElementById('copy-tooltip');
+  const emailStr = 'vikashkushwaha3045@gmail.com';
+
+  if (!copyBtn) return;
+
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(emailStr).then(() => {
+      if (tooltip) {
+        tooltip.classList.add('show');
+        setTimeout(() => {
+          tooltip.classList.remove('show');
+        }, 2000);
+      }
+    }).catch(err => {
+      console.error('Could not copy email: ', err);
+    });
   });
 }
 

@@ -2260,6 +2260,80 @@ button, input, textarea {
   color: var(--text-muted);
 }
 
+/* Error Toast Styling */
+.toast-notification.error {
+  border-color: #ff3366;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 51, 102, 0.4);
+}
+
+.toast-notification.error .toast-icon {
+  color: #ff3366;
+}
+
+/* Email Copy Button & Tooltip */
+.email-copy-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  position: relative;
+  flex-wrap: wrap;
+}
+
+.copy-email-btn {
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: var(--cyan-accent);
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.copy-email-btn:hover {
+  background: var(--cyan-accent);
+  color: #0a0a14;
+  box-shadow: 0 0 12px var(--cyan-glow);
+}
+
+.copy-tooltip {
+  position: absolute;
+  top: -32px;
+  right: 0;
+  background: var(--cyan-accent);
+  color: #0a0a14;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateY(5px);
+  white-space: nowrap;
+}
+
+.copy-tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Submit Button Loading State */
+.btn.btn-loading {
+  opacity: 0.85;
+  cursor: wait;
+  pointer-events: none;
+}
+
+.btn-icon {
+  margin-left: 0.5rem;
+}
+
+
 /* ===================================================================
    RESPONSIVE MEDIA QUERIES
    =================================================================== */
