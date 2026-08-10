@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050814" />
+      <stop offset="100%" stop-color="#0a0518" />
+    </linearGradient>
+    <linearGradient id="bar-grad-1" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#7000ff" />
+      <stop offset="100%" stop-color="#00f0ff" />
+    </linearGradient>
+    <filter id="glow2">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#bg2)" />
+
+  <!-- Background Grid -->
+  <g stroke="rgba(112, 0, 255, 0.1)" stroke-width="1">
+    <line x1="0" y1="100" x2="800" y2="100" />
+    <line x1="0" y1="200" x2="800" y2="200" />
+    <line x1="0" y1="300" x2="800" y2="300" />
+    <line x1="0" y1="400" x2="800" y2="400" />
+  </g>
+
+  <!-- 3D Bar Chart Visual -->
+  <g transform="translate(120, 100)">
+    <!-- Bar 1 -->
+    <rect x="40" y="160" width="50" height="180" rx="4" fill="url(#bar-grad-1)" opacity="0.85"/>
+    <text x="65" y="145" fill="#00f0ff" font-family="monospace" font-size="12" text-anchor="middle">$12.4K</text>
+    
+    <!-- Bar 2 -->
+    <rect x="130" y="100" width="50" height="240" rx="4" fill="url(#bar-grad-1)" opacity="0.9" filter="url(#glow2)"/>
+    <text x="155" y="85" fill="#00f0ff" font-family="monospace" font-size="12" text-anchor="middle">$24.8K</text>
+    
+    <!-- Bar 3 -->
+    <rect x="220" y="200" width="50" height="140" rx="4" fill="url(#bar-grad-1)" opacity="0.7"/>
+    <text x="245" y="185" fill="#00f0ff" font-family="monospace" font-size="12" text-anchor="middle">$9.2K</text>
+    
+    <!-- Bar 4 -->
+    <rect x="310" y="60" width="50" height="280" rx="4" fill="url(#bar-grad-1)" filter="url(#glow2)"/>
+    <text x="335" y="45" fill="#00f0ff" font-family="monospace" font-size="12" text-anchor="middle">$38.5K</text>
+
+    <!-- Bar 5 -->
+    <rect x="400" y="120" width="50" height="220" rx="4" fill="url(#bar-grad-1)" opacity="0.85"/>
+    <text x="425" y="105" fill="#00f0ff" font-family="monospace" font-size="12" text-anchor="middle">$21.1K</text>
+
+    <!-- Trend Line -->
+    <path d="M 65 160 L 155 100 L 245 200 L 335 60 L 425 120" fill="none" stroke="#ff007a" stroke-width="3" stroke-dasharray="6 4" filter="url(#glow2)"/>
+    <circle cx="335" cy="60" r="6" fill="#ff007a" filter="url(#glow2)"/>
+  </g>
+
+  <!-- Titles -->
+  <text x="50" y="50" fill="#a855f7" font-family="sans-serif" font-size="16" font-weight="bold" letter-spacing="2">RETAIL SALES ANALYTICS // REVENUE INSIGHTS</text>
+  <text x="50" y="70" fill="#a0a0a0" font-family="monospace" font-size="12">PANDAS &amp; NUMPY ENGINE | MONTHLY SALES SURGE +34%</text>
+</svg>

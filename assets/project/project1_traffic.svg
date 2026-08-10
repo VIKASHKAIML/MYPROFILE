@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a14" />
+      <stop offset="100%" stop-color="#050508" />
+    </linearGradient>
+    <linearGradient id="cyan-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#7000ff" stop-opacity="0.8" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="500" fill="url(#bg1)" />
+  
+  <!-- Grid Lines -->
+  <g stroke="rgba(0, 240, 255, 0.08)" stroke-width="1">
+    <line x1="0" y1="100" x2="800" y2="100" />
+    <line x1="0" y1="200" x2="800" y2="200" />
+    <line x1="0" y1="300" x2="800" y2="300" />
+    <line x1="0" y1="400" x2="800" y2="400" />
+    <line x1="160" y1="0" x2="160" y2="500" />
+    <line x1="320" y1="0" x2="320" y2="500" />
+    <line x1="480" y1="0" x2="480" y2="500" />
+    <line x1="640" y1="0" x2="640" y2="500" />
+  </g>
+  
+  <!-- Camera Analytics Overlay -->
+  <rect x="140" y="90" width="520" height="320" rx="12" fill="none" stroke="#00f0ff" stroke-width="1.5" stroke-dasharray="8 8" opacity="0.6"/>
+  
+  <!-- Object Detection Bounding Boxes -->
+  <!-- Car 1 -->
+  <rect x="220" y="160" width="160" height="120" rx="6" fill="rgba(0, 240, 255, 0.05)" stroke="#00f0ff" stroke-width="2" filter="url(#glow)"/>
+  <text x="225" y="152" fill="#00f0ff" font-family="monospace" font-size="12" font-weight="bold">VEHICLE_01 [CONF: 98.4%]</text>
+  <circle cx="300" cy="220" r="4" fill="#00f0ff" />
+  <polyline points="280,220 300,220 320,200" fill="none" stroke="#00f0ff" stroke-width="1.5"/>
+
+  <!-- Car 2 -->
+  <rect x="420" y="220" width="180" height="130" rx="6" fill="rgba(112, 0, 255, 0.08)" stroke="#7000ff" stroke-width="2" filter="url(#glow)"/>
+  <text x="425" y="212" fill="#a855f7" font-family="monospace" font-size="12" font-weight="bold">VEHICLE_02 [FLOW ANOMALY]</text>
+
+  <!-- Speed Data Chart Overlay -->
+  <path d="M 160 380 Q 280 280, 400 340 T 640 260" fill="none" stroke="#00f0ff" stroke-width="3" filter="url(#glow)" />
+  <path d="M 160 380 Q 280 280, 400 340 T 640 260 L 640 400 L 160 400 Z" fill="url(#cyan-glow)" opacity="0.15" />
+  
+  <!-- HUD Text -->
+  <text x="50" y="50" fill="#00f0ff" font-family="sans-serif" font-size="16" font-weight="bold" letter-spacing="2">VIDEO ANALYTICS ENGINE // TRAFFIC FLOW</text>
+  <text x="50" y="70" fill="#a0a0a0" font-family="monospace" font-size="12">CAM_ID: 0842-LKNOW | FPS: 60 | OBJECTS DETECTED: 42</text>
+</svg>
