@@ -68,10 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initContactForm();
   initCopyEmail();
   initBackToTop();
+  initCodeProtection();
 });
 
 /* ===================================================================
-   0. DARK / LIGHT MODE THEME SYSTEM
+   0. MULTI-THEME SYSTEM (CYBER DARK, PURE WHITE, MATRIX GREEN, SYNTHWAVE)
    =================================================================== */
 function initThemeToggle() {
   const themeToggleBtn = document.getElementById('theme-toggle');
@@ -79,31 +80,65 @@ function initThemeToggle() {
 
   if (!themeToggleBtn) return;
 
-  const savedTheme = localStorage.getItem('vk_portfolio_theme');
-  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  const themes = ['dark', 'white', 'matrix', 'synthwave'];
+  
+  const themeIcons = {
+    dark: 'fa-solid fa-moon',
+    white: 'fa-solid fa-sun',
+    matrix: 'fa-solid fa-terminal',
+    synthwave: 'fa-solid fa-fire-flame-curved'
+  };
 
-  let currentTheme = savedTheme || (prefersLight ? 'light' : 'dark');
-  applyTheme(currentTheme);
+  const themeNames = {
+    dark: 'Cyber Dark Mode',
+    white: 'Pure White Mode',
+    matrix: 'Matrix Hacker Green',
+    synthwave: 'Sunset Synthwave Mode'
+  };
+
+  const themeFogColors = {
+    dark: 0x050508,
+    white: 0xf8fafc,
+    matrix: 0x030c03,
+    synthwave: 0x0d0714
+  };
+
+  const savedTheme = localStorage.getItem('vk_portfolio_theme');
+  // Backward compatibility with legacy 'light' preference
+  let initialTheme = savedTheme === 'light' ? 'white' : savedTheme;
+  if (!themes.includes(initialTheme)) {
+    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    initialTheme = prefersLight ? 'white' : 'dark';
+  }
+
+  let currentTheme = initialTheme;
+  applyTheme(currentTheme, false);
 
   themeToggleBtn.addEventListener('click', () => {
-    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    applyTheme(currentTheme);
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    currentTheme = themes[nextIndex];
+    applyTheme(currentTheme, true);
     localStorage.setItem('vk_portfolio_theme', currentTheme);
   });
 
-  function applyTheme(theme) {
+  function applyTheme(theme, notify = true) {
     document.documentElement.setAttribute('data-theme', theme);
 
     if (themeIcon) {
-      if (theme === 'light') {
-        themeIcon.className = 'fa-solid fa-sun';
-      } else {
-        themeIcon.className = 'fa-solid fa-moon';
-      }
+      themeIcon.className = themeIcons[theme] || 'fa-solid fa-moon';
     }
 
-    if (scene && scene.fog) {
-      scene.fog.color.setHex(theme === 'light' ? 0xf0f4f9 : 0x050508);
+    if (themeToggleBtn) {
+      themeToggleBtn.setAttribute('title', `Active: ${themeNames[theme]} (Click to cycle themes)`);
+    }
+
+    if (typeof scene !== 'undefined' && scene && scene.fog) {
+      scene.fog.color.setHex(themeFogColors[theme] || 0x050508);
+    }
+
+    if (notify && typeof showToast === 'function') {
+      showToast('Theme Mode Switched', `Activated ${themeNames[theme]}`, false);
     }
   }
 }
@@ -683,6 +718,145 @@ function initBackToTop() {
         top: 0,
         behavior: 'smooth'
       });
+    });
+  }
+}
+
+/* ===================================================================
+   9. CODE PROTECTION & INSPECT / CTRL+U RESTRICTIONS
+   =================================================================== */
+function initCodeProtection() {
+  const securityOverlay = document.getElementById('security-overlay');
+  const closeBtn = document.getElementById('security-close-btn');
+  const ackBtn = document.getElementById('security-ack-btn');
+  const matrixTextEl = document.getElementById('security-matrix-text');
+
+  let matrixInterval = null;
+
+  function openSecurityModal(reason = 'Shortcut key command restricted.') {
+    if (!securityOverlay) return;
+    securityOverlay.classList.add('show');
+    securityOverlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    // Matrix hex scramble animation
+    startMatrixScramble();
+
+    // Print warning banner to console & clear
+    try {
+      console.clear();
+      console.log(
+        '%c VK-OS KERNEL SECURITY LAYER %c Inspection & Ctrl+U Restricted ',
+        'background:#00f0ff; color:#0a0a14; font-weight:bold; font-size:14px; padding:4px 8px; border-radius:4px;',
+        'background:#7000ff; color:#ffffff; font-weight:bold; font-size:14px; padding:4px 8px; border-radius:4px;'
+      );
+    } catch (e) {}
+  }
+
+  function closeSecurityModal() {
+    if (!securityOverlay) return;
+    securityOverlay.classList.remove('show');
+    securityOverlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (matrixInterval) clearInterval(matrixInterval);
+  }
+
+  function startMatrixScramble() {
+    if (matrixInterval) clearInterval(matrixInterval);
+    const hexChars = '0123456789ABCDEF';
+    let iterations = 0;
+    matrixInterval = setInterval(() => {
+      let scrambled = '';
+      for (let i = 0; i < 4; i++) {
+        let chunk = '0x';
+        for (let c = 0; c < 4; c++) {
+          chunk += hexChars[Math.floor(Math.random() * hexChars.length)];
+        }
+        scrambled += chunk + ' ';
+      }
+      scrambled += '[PROTECTED_KERNEL_BYTECODE_VK_OS]';
+      if (matrixTextEl) matrixTextEl.textContent = scrambled;
+
+      iterations++;
+      if (iterations > 40) {
+        clearInterval(matrixInterval);
+      }
+    }, 50);
+  }
+
+  // 1. Disable Right Click Context Menu
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    openSecurityModal('Right-click context menu is restricted.');
+  });
+
+  // 2. Intercept Inspect & View Source Keyboard Shortcuts
+  document.addEventListener('keydown', (e) => {
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+    const keyCode = e.keyCode || e.which;
+
+    // F12 key
+    if (keyCode === 123) {
+      e.preventDefault();
+      e.stopPropagation();
+      openSecurityModal('F12 Developer Tools key restricted.');
+      return false;
+    }
+
+    // Ctrl+U / Cmd+Opt+U (View Source)
+    if (ctrlOrCmd && (e.key === 'u' || e.key === 'U' || keyCode === 85)) {
+      e.preventDefault();
+      e.stopPropagation();
+      openSecurityModal('Ctrl+U View-Source restricted.');
+      return false;
+    }
+
+    // Ctrl+Shift+I / Cmd+Opt+I (Inspect Element)
+    if (ctrlOrCmd && e.shiftKey && (e.key === 'I' || e.key === 'i' || keyCode === 73)) {
+      e.preventDefault();
+      e.stopPropagation();
+      openSecurityModal('Inspect Element shortcut restricted.');
+      return false;
+    }
+
+    // Ctrl+Shift+J / Cmd+Opt+J (Console)
+    if (ctrlOrCmd && e.shiftKey && (e.key === 'J' || e.key === 'j' || keyCode === 74)) {
+      e.preventDefault();
+      e.stopPropagation();
+      openSecurityModal('Console shortcut restricted.');
+      return false;
+    }
+
+    // Ctrl+Shift+C (Inspect Element selection tool)
+    if (ctrlOrCmd && e.shiftKey && (e.key === 'C' || e.key === 'c' || keyCode === 67)) {
+      e.preventDefault();
+      e.stopPropagation();
+      openSecurityModal('Element selector restricted.');
+      return false;
+    }
+
+    // Ctrl+S / Cmd+S (Save Page)
+    if (ctrlOrCmd && (e.key === 's' || e.key === 'S' || keyCode === 83)) {
+      e.preventDefault();
+      e.stopPropagation();
+      openSecurityModal('Save Page command restricted.');
+      return false;
+    }
+
+    // Escape key closes security modal
+    if (e.key === 'Escape' && securityOverlay && securityOverlay.classList.contains('show')) {
+      closeSecurityModal();
+    }
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', closeSecurityModal);
+  if (ackBtn) ackBtn.addEventListener('click', closeSecurityModal);
+  if (securityOverlay) {
+    securityOverlay.addEventListener('click', (e) => {
+      if (e.target === securityOverlay) {
+        closeSecurityModal();
+      }
     });
   }
 }

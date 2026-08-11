@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description"
-    content="Vikash Kushwaha - 3D Personal Portfolio | Data Analytics Professional, Python, Excel, AI & ML">
+    content="Vikash Kushwaha - 3D Personal Portfolio | Data Analytics Professional(MERN), Python, Excel, AI & ML">
   <meta name="author" content="Vikash Kushwaha">
-  <title>Vikash Kushwaha | Data Analytics & AI/ML Portfolio</title>
+  <title>Vikash Kushwaha</title>
 
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -98,9 +98,11 @@
   <header id="main-header" class="navbar-container">
     <nav class="navbar">
       <a href="#hero" class="nav-logo">
-        <div class="logo-box">
-          <span class="logo-text">VK</span>
-          <span class="logo-glow"></span>
+        <div class="logo-box" title="Vikash Kushwaha">
+          <div class="logo-img-wrapper">
+            <img src="assets/logo.jpg" alt="Vikash Kushwaha Logo" class="logo-img">
+          </div>
+          <div class="logo-blink-ring"></div>
         </div>
         <div class="logo-title">
           <span class="name">VIKASH KUSHWAHA</span>
@@ -1002,6 +1004,48 @@
     <div class="toast-content">
       <h4 class="toast-title">Message Prepared Successfully</h4>
       <p class="toast-msg">Thank you for reaching out, Vikash will respond shortly!</p>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SECURITY SHIELD MODAL (SOURCE CODE INSPECTION RESTRICTION)
+       =================================================================== -->
+  <div id="security-overlay" class="security-overlay" aria-hidden="true">
+    <div class="security-modal glass-card">
+      <div class="security-header">
+        <div class="security-badge">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>VK-OS // SECURITY ENFORCED</span>
+        </div>
+        <button class="security-close" id="security-close-btn" aria-label="Close Security Alert">&times;</button>
+      </div>
+
+      <div class="security-body">
+        <div class="security-icon-glow">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3 class="security-title">SOURCE CODE ENCRYPTED & PROTECTED</h3>
+        <p class="security-subtitle">Direct browser source viewing (Ctrl+U) and Inspect Element (F12) shortcuts are restricted on VK-OS Portfolio Kernel.</p>
+        
+        <div class="security-matrix-box">
+          <div class="matrix-header">
+            <span class="matrix-dot red"></span>
+            <span class="matrix-dot yellow"></span>
+            <span class="matrix-dot green"></span>
+            <span class="matrix-title">ENCRYPTED_STREAM_VIEWER.HEX</span>
+          </div>
+          <div class="matrix-code" id="security-matrix-text">
+            0x7A9F 0x41C2 0x8E3B [VK_KERNEL_PROTECTED_BYTECODE]...
+          </div>
+        </div>
+      </div>
+
+      <div class="security-footer">
+        <button id="security-ack-btn" class="btn btn-primary glow-effect">
+          <i class="fa-solid fa-shield-cat"></i>
+          <span>ACKNOWLEDGE & RETURN TO PORTFOLIO</span>
+        </button>
+      </div>
     </div>
   </div>
 
