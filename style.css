@@ -1716,33 +1716,97 @@ button, input, textarea {
   gap: 2rem;
 }
 
+/* --- Education Badge: Flip Card --- */
 .edu-badge-score {
-  width: 100px;
-  height: 100px;
-  min-width: 100px;
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(112, 0, 255, 0.15));
-  border: 1px solid var(--cyan-accent);
-  border-radius: 50%;
+  width: 120px;
+  min-width: 120px;
+  height: 130px;
+  perspective: 600px;
+  cursor: pointer;
+}
+
+.edu-badge-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.edu-badge-score:hover .edu-badge-inner {
+  transform: rotateY(180deg);
+}
+
+/* Front face — Logo */
+.edu-badge-front,
+.edu-badge-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.4rem;
+  padding: 0.8rem 0.6rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(112, 0, 255, 0.12));
+  border: 1px solid var(--cyan-accent);
   box-shadow: 0 0 20px var(--cyan-glow);
+}
+
+.edu-badge-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(135deg, rgba(112, 0, 255, 0.25), rgba(0, 240, 255, 0.18));
+  box-shadow: 0 0 28px rgba(0, 240, 255, 0.5);
+}
+
+.edu-logo-wrapper {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 240, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+}
+
+.edu-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
 }
 
 .score-val {
   font-family: var(--font-heading);
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 900;
   color: #ffffff;
   line-height: 1;
+  text-shadow: 0 0 12px rgba(0, 240, 255, 0.8);
 }
 
 .score-lbl {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--cyan-accent);
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-hint {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--cyan-accent);
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+  margin-top: 0.1rem;
 }
 
 .edu-details {
@@ -2832,5 +2896,272 @@ button, input, textarea {
   .portrait-stage {
     transform: scale(0.88);
   }
+}
+
+
+/* ===================================================================
+   WHITE / LIGHT MODE — COMPREHENSIVE VISIBILITY OVERRIDES
+   Fixes all hardcoded dark colors so every element is readable
+   on a light background. Does NOT affect dark/matrix/synthwave modes.
+   =================================================================== */
+
+[data-theme="white"] .navbar,
+[data-theme="light"] .navbar {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 32px rgba(0, 80, 200, 0.12);
+  border-color: rgba(0, 102, 255, 0.18);
+}
+
+/* Mobile nav menu */
+[data-theme="white"] .nav-menu,
+[data-theme="light"] .nav-menu {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(0, 102, 255, 0.2);
+}
+
+/* Theme toggle button */
+[data-theme="white"] .theme-toggle-btn,
+[data-theme="light"] .theme-toggle-btn {
+  background: rgba(0, 102, 255, 0.08);
+}
+
+/* --- Hero Section --- */
+[data-theme="white"] .hero-name,
+[data-theme="light"] .hero-name {
+  color: var(--text-main);
+}
+
+[data-theme="white"] .hero-highlights,
+[data-theme="light"] .hero-highlights {
+  border-top-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="white"] .portrait-badge,
+[data-theme="light"] .portrait-badge {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 24px rgba(0, 80, 200, 0.15);
+}
+
+[data-theme="white"] .portrait-card,
+[data-theme="light"] .portrait-card {
+  background: radial-gradient(circle at 50% 50%, rgba(0, 102, 255, 0.08), rgba(230, 235, 255, 0.95));
+}
+
+/* --- Glass Cards --- */
+[data-theme="white"] .glass-card,
+[data-theme="light"] .glass-card {
+  box-shadow: 0 8px 32px rgba(0, 80, 200, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="white"] .glass-card:hover,
+[data-theme="light"] .glass-card:hover {
+  box-shadow: 0 16px 40px rgba(0, 80, 200, 0.18), 0 0 20px rgba(0, 102, 255, 0.1);
+}
+
+/* --- Compile/Loader title --- */
+[data-theme="white"] .compile-title,
+[data-theme="light"] .compile-title {
+  color: var(--text-main);
+}
+
+/* --- About Section --- */
+[data-theme="white"] .about-divider,
+[data-theme="light"] .about-divider {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="white"] .about-meta-list,
+[data-theme="light"] .about-meta-list {
+  background: rgba(0, 80, 200, 0.04);
+  border-color: rgba(0, 80, 200, 0.1);
+}
+
+/* --- Stat Cards --- */
+[data-theme="white"] .stat-number,
+[data-theme="light"] .stat-number {
+  background: linear-gradient(135deg, var(--text-main), var(--cyan-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* --- Skill Tags --- */
+[data-theme="white"] .skill-tag,
+[data-theme="light"] .skill-tag {
+  background: rgba(0, 80, 200, 0.05);
+  border-color: rgba(0, 80, 200, 0.15);
+}
+
+[data-theme="white"] .skill-tag:hover,
+[data-theme="light"] .skill-tag:hover {
+  color: #fff;
+}
+
+[data-theme="white"] .skill-category-header,
+[data-theme="light"] .skill-category-header {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+/* --- Experience Timeline --- */
+[data-theme="white"] .timeline-line,
+[data-theme="light"] .timeline-line {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="white"] .timeline-dot,
+[data-theme="light"] .timeline-dot {
+  background: var(--bg-dark);
+}
+
+[data-theme="white"] .exp-tags,
+[data-theme="light"] .exp-tags {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="white"] .exp-tags span,
+[data-theme="light"] .exp-tags span {
+  background: rgba(0, 80, 200, 0.06);
+  border-color: rgba(0, 80, 200, 0.15);
+  color: var(--text-main);
+}
+
+/* --- Projects --- */
+[data-theme="white"] .project-img-wrapper,
+[data-theme="light"] .project-img-wrapper {
+  background: #e8eef8;
+}
+
+[data-theme="white"] .project-year,
+[data-theme="light"] .project-year {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--cyan-accent);
+}
+
+[data-theme="white"] .project-overlay,
+[data-theme="light"] .project-overlay {
+  background: rgba(220, 230, 255, 0.75);
+}
+
+/* --- Education Badge Flip Card --- */
+[data-theme="white"] .edu-badge-front,
+[data-theme="light"] .edu-badge-front,
+[data-theme="white"] .edu-badge-back,
+[data-theme="light"] .edu-badge-back {
+  background: linear-gradient(135deg, rgba(0, 102, 255, 0.1), rgba(107, 33, 168, 0.1));
+  box-shadow: 0 0 20px rgba(0, 102, 255, 0.2);
+}
+
+[data-theme="white"] .edu-badge-back,
+[data-theme="light"] .edu-badge-back {
+  box-shadow: 0 0 28px rgba(0, 102, 255, 0.35);
+}
+
+[data-theme="white"] .score-val,
+[data-theme="light"] .score-val {
+  color: var(--text-main);
+  text-shadow: 0 0 10px rgba(0, 102, 255, 0.3);
+}
+
+/* --- Buttons --- */
+[data-theme="white"] .btn-secondary,
+[data-theme="light"] .btn-secondary {
+  background: rgba(0, 80, 200, 0.06);
+  color: var(--text-main);
+}
+
+[data-theme="white"] .btn-tertiary,
+[data-theme="light"] .btn-tertiary {
+  border-color: rgba(0, 80, 200, 0.25);
+  color: var(--text-muted);
+}
+
+[data-theme="white"] .btn-tertiary:hover,
+[data-theme="light"] .btn-tertiary:hover {
+  color: var(--cyan-accent);
+}
+
+/* --- Contact Form Inputs --- */
+[data-theme="white"] .input-wrapper input,
+[data-theme="white"] .input-wrapper textarea,
+[data-theme="light"] .input-wrapper input,
+[data-theme="light"] .input-wrapper textarea {
+  background: rgba(240, 244, 255, 0.9);
+  border-color: rgba(0, 80, 200, 0.15);
+  color: var(--text-main);
+}
+
+[data-theme="white"] .input-wrapper input::placeholder,
+[data-theme="white"] .input-wrapper textarea::placeholder,
+[data-theme="light"] .input-wrapper input::placeholder,
+[data-theme="light"] .input-wrapper textarea::placeholder {
+  color: var(--text-dim);
+}
+
+/* --- Social Buttons --- */
+[data-theme="white"] .social-btn,
+[data-theme="light"] .social-btn,
+[data-theme="white"] .footer-socials a,
+[data-theme="light"] .footer-socials a {
+  background: rgba(0, 80, 200, 0.07);
+  border-color: rgba(0, 80, 200, 0.15);
+  color: var(--text-main);
+}
+
+/* --- Footer --- */
+[data-theme="white"] .cinematic-footer,
+[data-theme="light"] .cinematic-footer {
+  background: #edf2fb;
+  border-top-color: rgba(0, 80, 200, 0.12);
+}
+
+[data-theme="white"] .footer-huge-name,
+[data-theme="light"] .footer-huge-name {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.05));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="white"] .footer-email-link:hover,
+[data-theme="light"] .footer-email-link:hover {
+  color: var(--text-main);
+}
+
+[data-theme="white"] .footer-divider,
+[data-theme="light"] .footer-divider {
+  background: linear-gradient(90deg, transparent, rgba(0, 102, 255, 0.3), transparent);
+}
+
+[data-theme="white"] .footer-copyright-row,
+[data-theme="light"] .footer-copyright-row {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+/* --- Progress Track & Loader elements --- */
+[data-theme="white"] .progress-track,
+[data-theme="light"] .progress-track {
+  background: rgba(0, 80, 200, 0.1);
+}
+
+/* --- Toast Notification --- */
+[data-theme="white"] .toast-notification,
+[data-theme="light"] .toast-notification {
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 10px 30px rgba(0, 80, 200, 0.2), 0 0 20px var(--cyan-glow);
+}
+
+[data-theme="white"] .toast-title,
+[data-theme="light"] .toast-title {
+  color: var(--text-main);
+}
+
+/* --- Security Modal --- */
+[data-theme="white"] .security-matrix-box,
+[data-theme="light"] .security-matrix-box {
+  background: rgba(230, 235, 255, 0.9);
+  border-color: var(--border-glass-hover);
+}
+
+[data-theme="white"] .security-matrix-box .matrix-header,
+[data-theme="light"] .security-matrix-box .matrix-header {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
 }
 
