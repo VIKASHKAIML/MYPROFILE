@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCopyEmail();
   initBackToTop();
   initCodeProtection();
+  initPhysicsSkills();
 });
 
 /* ===================================================================
@@ -859,4 +860,357 @@ function initCodeProtection() {
       }
     });
   }
+}
+
+
+/* ===================================================================
+   10. COLOR AVALANCHE â€” SKILLS PHYSICS (MATTER.JS + DOM DIVS)
+   Each block uses a named CSS color. Cursor auto-repels blocks.
+   =================================================================== */
+function initPhysicsSkills() {
+  const scene       = document.getElementById('ca-scene-container') || document.getElementById('ca-scene');
+  const sourceList  = document.getElementById('ca-color-source') || document.getElementById('ca-skills-source');
+  const gravBtn     = document.getElementById('ca-btn-gravity');
+  const explodeBtn  = document.getElementById('ca-btn-explode');
+  const section     = document.getElementById('skills-physics') || document.getElementById('skills') || document.querySelector('.color-avalanche-section');
+
+  if (!scene || !sourceList) return;
+
+  /* ── Read skills from source <ul> ────────────────────────── */
+  const SKILLS = Array.from(sourceList.querySelectorAll('li')).map(li => ({
+    label: li.textContent.trim(),
+    color: li.dataset.color || 'SteelBlue',
+  }));
+
+  /* ── Config ────────────────────────────────────────────────── */
+  const BLOCK_H     = 36;           // height of each pill/block
+  const FONT_SIZE   = 13;           // px
+  const H_PAD       = 18;           // horizontal padding inside block
+  const SCENE_H     = 500;          // canvas arena height
+  const CURSOR_R    = 55;           // radius of invisible cursor repeller
+  const RESTITUTION = 0.45;         // restitution for pile stacking
+  const FONT_STR    = `bold ${FONT_SIZE}px "Inter", sans-serif`;
+
+  /* ── State ─────────────────────────────────────────────────── */
+  let engine, runner, animId;
+  let bodies     = [];              // Matter.js body array
+  let divEls     = [];              // matching DOM div array
+  let cursorBody = null;
+  let isZeroGrav = false;
+  let curX = -9999, curY = -9999;
+  let isDragging = false, dragBody = null, dragDiv = null;
+  let prevX = 0, prevY = 0, velX = 0, velY = 0;
+
+  /* ── Measure text width for block sizing ──────────────────── */
+  const _measureCtx = document.createElement('canvas').getContext('2d');
+  function blockWidth(label) {
+    _measureCtx.font = FONT_STR;
+    return Math.max(_measureCtx.measureText(label).width + H_PAD * 2, 65);
+  }
+
+  /* ── Convert client coords → scene-space coords ─────────── */
+  function toSceneXY(clientX, clientY) {
+    const r = scene.getBoundingClientRect();
+    return { x: clientX - r.left, y: clientY - r.top };
+  }
+
+  /* ── Determine readable text color for a CSS color name ─────── */
+  function textColorFor(cssColor) {
+    const lightColors = [
+      'aliceblue','antiquewhite','aqua','aquamarine','azure','beige','bisque',
+      'blanchedalmond','burlywood','chartreuse','cornsilk','cyan','floralwhite',
+      'gainsboro','ghostwhite','gold','goldenrod','greenyellow','honeydew','ivory',
+      'khaki','lavender','lavenderblush','lawngreen','lemonchiffon','lightblue',
+      'lightcoral','lightcyan','lightgoldenrodyellow','lightgray','lightgreen',
+      'lightpink','lightsalmon','lightseagreen','lightskyblue','lightslategray',
+      'lightsteelblue','lightyellow','lime','linen','mintcream','mistyrose',
+      'moccasin','navajowhite','oldlace','papayawhip','peachpuff','pink','powderblue',
+      'seashell','skyblue','snow','thistle','wheat','white','whitesmoke','yellow'
+    ];
+    return lightColors.includes(cssColor.toLowerCase()) ? '#000000' : '#ffffff';
+  }
+
+  /* ── Build the engine + DOM elements ──────────────────────── */
+  function build() {
+    if (typeof Matter === 'undefined') return;
+
+    const W = scene.offsetWidth || window.innerWidth;
+    scene.style.height   = SCENE_H + 'px';
+    scene.style.position = 'relative';
+    scene.style.overflow = 'hidden';
+
+    const { Engine, Runner, Bodies, Body, World } = Matter;
+
+    engine = Engine.create({ gravity: { x: 0, y: 1.2 } });
+    const world = engine.world;
+
+    /* Walls — Floor, sides, elevated ceiling */
+    const W_OPT = { isStatic: true, restitution: 0.4, friction: 0.3 };
+    World.add(world, [
+      Bodies.rectangle(W / 2,  SCENE_H + 25, W + 400, 50,        W_OPT), // floor
+      Bodies.rectangle(W / 2,  -800,         W + 400, 50,        W_OPT), // elevated ceiling (above spawn)
+      Bodies.rectangle(-25,    SCENE_H / 2,  50, SCENE_H * 4,    W_OPT), // left wall
+      Bodies.rectangle(W + 25, SCENE_H / 2,  50, SCENE_H * 4,    W_OPT), // right wall
+    ]);
+
+    /* Invisible cursor repeller */
+    cursorBody = Bodies.circle(-9999, -9999, CURSOR_R, {
+      isStatic: true,
+      restitution: 1.1,
+      friction: 0,
+      frictionAir: 0,
+      label: '__cursor__',
+    });
+    World.add(world, cursorBody);
+
+    /* Create one DOM div + one Matter body per skill block */
+    bodies  = [];
+    divEls  = [];
+    scene.innerHTML = ''; // clear old divs on rebuild
+
+    SKILLS.forEach((skill, i) => {
+      const bw  = blockWidth(skill.label);
+      const col = i % 7;
+      const x   = (col / 7) * (W - 120) + 60 + (Math.random() - 0.5) * 30;
+      // Spawn Y staggered above top of scene so they tumble down cleanly
+      const y   = -30 - (i * 22);
+
+      /* Matter body chamfered pill */
+      const body = Bodies.rectangle(x, y, bw, BLOCK_H, {
+        restitution: RESTITUTION,
+        friction:    0.35,
+        frictionAir: 0.015,
+        chamfer:     { radius: BLOCK_H / 2 },
+        label:       skill.label,
+        plugin:      { color: skill.color, width: bw },
+      });
+      Body.setVelocity(body, {
+        x: (Math.random() - 0.5) * 3,
+        y: Math.random() * 2 + 1,
+      });
+
+      World.add(world, body);
+      bodies.push(body);
+
+      /* DOM div — styled pill matching screenshot */
+      const div = document.createElement('div');
+      div.className   = 'ca-block';
+      div.textContent = skill.label;
+      div.style.cssText = `
+        position: absolute;
+        width:  ${bw}px;
+        height: ${BLOCK_H}px;
+        border-radius: ${BLOCK_H / 2}px;
+        background: ${skill.color};
+        color: ${textColorFor(skill.color)};
+        font: bold ${FONT_SIZE}px "Inter", sans-serif;
+        line-height: ${BLOCK_H}px;
+        text-align: center;
+        white-space: nowrap;
+        pointer-events: none;
+        transform-origin: center center;
+        will-change: transform;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        user-select: none;
+      `;
+      scene.appendChild(div);
+      divEls.push(div);
+    });
+
+
+    /* Runner */
+    runner = Runner.create();
+    Runner.run(runner, engine);
+
+    /* Animation loop — sync DOM divs to physics bodies */
+    function frame() {
+      animId = requestAnimationFrame(frame);
+
+      /* Move cursor repeller */
+      if (!isDragging) {
+        Matter.Body.setPosition(cursorBody, { x: curX, y: curY });
+      } else {
+        Matter.Body.setPosition(cursorBody, { x: -9999, y: -9999 });
+      }
+
+      /* Hover detection for cursor styling */
+      if (!isDragging && curX > 0) {
+        const hovered = Matter.Query.point(bodies, { x: curX, y: curY });
+        scene.style.cursor = hovered.length > 0 ? 'grab' : 'crosshair';
+      }
+
+      /* Sync each div to its physics body */
+      for (let i = 0; i < bodies.length; i++) {
+        const b   = bodies[i];
+        const div = divEls[i];
+        const bw  = b.plugin.width;
+        const { x, y } = b.position;
+        div.style.transform = `translate(${x - bw / 2}px, ${y - BLOCK_H / 2}px) rotate(${b.angle}rad)`;
+      }
+    }
+    frame();
+
+    /* ── Pointer events ─────────────────────────────────────── */
+    scene.addEventListener('mousemove', onMove);
+    scene.addEventListener('mouseleave', onLeave);
+    scene.addEventListener('mousedown', onDown);
+    window.addEventListener('mouseup', onUp);
+
+    scene.addEventListener('touchstart', onTouchStart, { passive: false });
+    scene.addEventListener('touchmove',  onTouchMove,  { passive: false });
+    window.addEventListener('touchend',  onTouchEnd);
+  }
+
+  /* ── Event handlers ────────────────────────────────────────── */
+  function onMove(e) {
+    const p = toSceneXY(e.clientX, e.clientY);
+    velX = p.x - prevX;
+    velY = p.y - prevY;
+    prevX = p.x; prevY = p.y;
+    curX  = p.x; curY  = p.y;
+    if (isDragging && dragBody) {
+      Matter.Body.setPosition(dragBody, p);
+      Matter.Body.setVelocity(dragBody, { x: velX, y: velY });
+    }
+  }
+
+  function onLeave() {
+    curX = -9999; curY = -9999;
+    if (isDragging && dragBody) {
+      Matter.Body.setVelocity(dragBody, { x: velX * 2.5, y: velY * 2.5 });
+      if (dragDiv) dragDiv.classList.remove('is-grabbed');
+      isDragging = false; dragBody = null; dragDiv = null;
+      scene.classList.remove('is-dragging');
+    }
+  }
+
+  function onDown(e) {
+    const p     = toSceneXY(e.clientX, e.clientY);
+    const found = Matter.Query.point(bodies, p);
+    if (found.length > 0) {
+      dragBody = found[0];
+      const idx = bodies.indexOf(dragBody);
+      if (idx !== -1) dragDiv = divEls[idx];
+      if (dragDiv) dragDiv.classList.add('is-grabbed');
+      isDragging = true;
+      prevX = p.x; prevY = p.y;
+      velX = 0; velY = 0;
+      scene.classList.add('is-dragging');
+    }
+  }
+
+  function onUp() {
+    if (isDragging && dragBody) {
+      Matter.Body.setVelocity(dragBody, { x: velX * 2.5, y: velY * 2.5 });
+      if (dragDiv) dragDiv.classList.remove('is-grabbed');
+    }
+    isDragging = false; dragBody = null; dragDiv = null;
+    scene.classList.remove('is-dragging');
+  }
+
+  function onTouchStart(e) {
+    const t = e.touches[0];
+    const p = toSceneXY(t.clientX, t.clientY);
+    curX = p.x; curY = p.y;
+    prevX = p.x; prevY = p.y;
+    velX = 0; velY = 0;
+    const found = Matter.Query.point(bodies, p);
+    if (found.length > 0) {
+      e.preventDefault();
+      dragBody = found[0];
+      const idx = bodies.indexOf(dragBody);
+      if (idx !== -1) dragDiv = divEls[idx];
+      if (dragDiv) dragDiv.classList.add('is-grabbed');
+      isDragging = true;
+      scene.classList.add('is-dragging');
+    }
+  }
+
+  function onTouchMove(e) {
+    const t = e.touches[0];
+    const p = toSceneXY(t.clientX, t.clientY);
+    velX = p.x - prevX; velY = p.y - prevY;
+    prevX = p.x; prevY = p.y;
+    curX  = p.x; curY  = p.y;
+    if (isDragging && dragBody) {
+      e.preventDefault();
+      Matter.Body.setPosition(dragBody, p);
+      Matter.Body.setVelocity(dragBody, { x: velX, y: velY });
+    }
+  }
+
+  function onTouchEnd() {
+    if (isDragging && dragBody) {
+      Matter.Body.setVelocity(dragBody, { x: velX * 2.5, y: velY * 2.5 });
+      if (dragDiv) dragDiv.classList.remove('is-grabbed');
+    }
+    isDragging = false; dragBody = null; dragDiv = null;
+    scene.classList.remove('is-dragging');
+    curX = -9999; curY = -9999;
+  }
+
+  /* ── Buttons ───────────────────────────────────────────────── */
+  if (gravBtn) {
+    gravBtn.addEventListener('click', () => {
+      if (!engine) return;
+      isZeroGrav = !isZeroGrav;
+      engine.gravity.y = isZeroGrav ? 0 : 1;
+      gravBtn.classList.toggle('active', isZeroGrav);
+      if (isZeroGrav) {
+        bodies.forEach(b => Matter.Body.setVelocity(b, {
+          x: (Math.random() - 0.5) * 10,
+          y: (Math.random() - 0.5) * 10,
+        }));
+      }
+    });
+  }
+
+  if (explodeBtn) {
+    explodeBtn.addEventListener('click', () => {
+      if (!engine) return;
+      const W  = scene.offsetWidth;
+      const cx = W / 2, cy = SCENE_H / 2;
+      bodies.forEach(b => {
+        const dx = b.position.x - cx;
+        const dy = b.position.y - cy;
+        const d  = Math.sqrt(dx * dx + dy * dy) || 1;
+        Matter.Body.applyForce(b, b.position, {
+          x: (dx / d) * 0.35,
+          y: (dy / d) * 0.35,
+        });
+      });
+    });
+  }
+
+  /* Immediate build execution & IntersectionObserver fallback */
+  if (section && 'IntersectionObserver' in window) {
+    const obs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !engine) {
+        build();
+        obs.disconnect();
+      }
+    }, { threshold: 0 });
+    obs.observe(section);
+  }
+  
+  // Guarantee build runs immediately after DOM setup
+  setTimeout(() => {
+    if (!engine) build();
+  }, 100);
+
+
+  /* â”€â”€ Rebuild on window resize â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (!engine) return;
+      cancelAnimationFrame(animId);
+      Matter.Runner.stop(runner);
+      Matter.World.clear(engine.world);
+      Matter.Engine.clear(engine);
+      engine = null;
+      build();
+    }, 300);
+  });
 }

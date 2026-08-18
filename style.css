@@ -3165,3 +3165,272 @@ button, input, textarea {
   border-bottom-color: rgba(0, 0, 0, 0.08);
 }
 
+/* ===================================================================
+   COLOR AVALANCHE SKILLS SECTION  — PREMIUM PHYSICS ARENA
+   =================================================================== */
+
+/* Section wrapper — full-width, dark bg, relative for overlay */
+.ca-section {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  min-height: 620px;
+  background: var(--bg-dark);
+  /* Subtle radial spotlight in the arena */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% 80%,
+      rgba(0, 240, 255, 0.055) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 60%,
+      rgba(112, 0, 255, 0.04) 0%, transparent 65%);
+}
+
+/* Grid-line floor effect */
+.ca-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glow line at the bottom (floor glow) */
+.ca-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(0,240,255,0.5) 30%,
+    rgba(112,0,255,0.5) 70%,
+    transparent 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* UI overlay — sits on top of the physics scene */
+.ca-ui-layer {
+  position: relative;
+  z-index: 10;
+  padding: 4rem 2rem 1.5rem;
+  max-width: 900px;
+  pointer-events: none;  /* let mouse pass through to scene below */
+}
+
+/* Make interactive elements inside the overlay clickable again */
+.ca-ui-layer .section-tag,
+.ca-ui-layer .ca-title,
+.ca-ui-layer .ca-desc,
+.ca-controls {
+  pointer-events: auto;
+}
+
+.ca-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0.4rem 0 0.5rem;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.ca-desc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.4rem;
+  font-family: var(--font-body);
+}
+
+/* Drag hint label */
+.ca-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  animation: ca-hint-pulse 2.5s ease-in-out infinite;
+}
+@keyframes ca-hint-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
+
+.ca-controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ca-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-main);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+}
+
+.ca-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.ca-btn:hover::before { opacity: 1; }
+
+.ca-btn:hover {
+  border-color: var(--cyan-accent);
+  color: var(--cyan-accent);
+  background: rgba(0, 240, 255, 0.07);
+  box-shadow: 0 0 18px var(--cyan-glow), 0 4px 16px rgba(0,0,0,0.3);
+  transform: translateY(-2px);
+}
+
+.ca-btn:active {
+  transform: translateY(0);
+}
+
+.ca-btn.active {
+  background: var(--cyan-accent);
+  color: #000;
+  border-color: var(--cyan-accent);
+  box-shadow: 0 0 24px var(--cyan-glow), 0 4px 20px rgba(0,240,255,0.3);
+}
+
+.ca-btn-outline {
+  border-color: rgba(112, 0, 255, 0.5);
+}
+.ca-btn-outline:hover {
+  border-color: var(--magenta-accent);
+  color: var(--magenta-accent);
+  background: rgba(255, 0, 122, 0.07);
+  box-shadow: 0 0 18px rgba(255, 0, 122, 0.35), 0 4px 16px rgba(0,0,0,0.3);
+}
+
+/* Physics scene arena */
+.ca-scene {
+  position: relative;
+  width: 100%;
+  min-height: 480px;
+  overflow: hidden;
+  cursor: crosshair;
+  touch-action: none;
+  background: transparent;
+  z-index: 1;
+}
+
+.ca-scene.is-dragging {
+  cursor: grabbing;
+}
+
+/* Individual skill pill block — positioned & animated by JS */
+.ca-block {
+  pointer-events: none; /* Scene handles all hit-testing via Matter.Query */
+  transition: box-shadow 0.15s ease, filter 0.15s ease;
+  will-change: transform;
+}
+
+.ca-block.is-grabbed {
+  filter: brightness(1.25) drop-shadow(0 0 10px currentColor);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.55) !important;
+}
+
+/* Floating particle dots in background of arena (injected by JS) */
+.ca-particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.35;
+  animation: ca-float linear infinite;
+}
+@keyframes ca-float {
+  0%   { transform: translateY(0) scale(1); opacity: 0.35; }
+  50%  { opacity: 0.6; }
+  100% { transform: translateY(-60px) scale(0.6); opacity: 0; }
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+  .ca-ui-layer { padding: 2.5rem 1.25rem 1rem; }
+  .ca-title    { font-size: clamp(1.6rem, 7vw, 2.5rem); }
+  .ca-scene    { min-height: 380px; }
+}
+
+/* Light / white theme overrides */
+[data-theme="white"] .ca-section,
+[data-theme="light"] .ca-section {
+  background: var(--bg-secondary);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% 80%, rgba(0,102,255,0.04) 0%, transparent 70%);
+}
+[data-theme="white"] .ca-section::before,
+[data-theme="light"] .ca-section::before {
+  background-image:
+    linear-gradient(rgba(0,102,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,102,255,0.04) 1px, transparent 1px);
+}
+
+[data-theme="white"] .ca-btn,
+[data-theme="light"] .ca-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.18);
+  color: var(--text-main);
+}
+[data-theme="white"] .ca-btn:hover,
+[data-theme="light"] .ca-btn:hover {
+  background: rgba(0, 102, 255, 0.07);
+}
+
+[data-theme="white"] .ca-scene,
+[data-theme="light"] .ca-scene {
+  background: rgba(0, 0, 0, 0.01);
+}
+
+/* Matrix theme */
+[data-theme="matrix"] .ca-section {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% 80%, rgba(0,255,102,0.05) 0%, transparent 70%);
+}
+[data-theme="matrix"] .ca-section::before {
+  background-image:
+    linear-gradient(rgba(0,255,102,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,102,0.04) 1px, transparent 1px);
+}
+[data-theme="matrix"] .ca-btn:hover {
+  border-color: var(--cyan-accent);
+  color: var(--cyan-accent);
+}
+
+/* Synthwave theme */
+[data-theme="synthwave"] .ca-section {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% 80%, rgba(255,153,0,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(255,0,127,0.05) 0%, transparent 65%);
+}
+
