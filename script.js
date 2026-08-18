@@ -935,7 +935,14 @@ function initPhysicsSkills() {
 
   /* ── Build the engine + DOM elements ──────────────────────── */
   function build() {
-    if (typeof Matter === 'undefined') return;
+    // On mobile networks, Matter.js CDN script may load asynchronously
+    if (typeof Matter === 'undefined') {
+      // Retry every 150ms until Matter.js is loaded on mobile
+      setTimeout(build, 150);
+      return;
+    }
+
+    if (engine) return; // Prevent duplicate physics engine instances
 
     const W = scene.offsetWidth || window.innerWidth || 360;
     scene.style.height   = SCENE_H + 'px';
@@ -1162,7 +1169,7 @@ function initPhysicsSkills() {
     gravBtn.addEventListener('click', () => {
       if (!engine) return;
       isZeroGrav = !isZeroGrav;
-      engine.gravity.y = isZeroGrav ? 0 : 1;
+      engine.gravity.y = isZeroGrav ? 0 : 1.2;
       gravBtn.classList.toggle('active', isZeroGrav);
       if (isZeroGrav) {
         bodies.forEach(b => Matter.Body.setVelocity(b, {
@@ -1176,40 +1183,29 @@ function initPhysicsSkills() {
   if (explodeBtn) {
     explodeBtn.addEventListener('click', () => {
       if (!engine) return;
-      const W  = scene.offsetWidth;
+      const W  = scene.offsetWidth || 360;
       const cx = W / 2, cy = SCENE_H / 2;
       bodies.forEach(b => {
         const dx = b.position.x - cx;
         const dy = b.position.y - cy;
         const d  = Math.sqrt(dx * dx + dy * dy) || 1;
         Matter.Body.applyForce(b, b.position, {
-          x: (dx / d) * 0.35,
-          y: (dy / d) * 0.35,
+          x: (dx / d) * 0.45,
+          y: (dy / d) * 0.45,
         });
       });
     });
   }
 
-  /* Immediate build execution & IntersectionObserver fallback */
-  if (section && 'IntersectionObserver' in window) {
-    const obs = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !engine) {
-        build();
-        obs.disconnect();
-      }
-    }, { threshold: 0 });
-    obs.observe(section);
-  }
-  
-  // Guarantee build runs immediately after DOM setup
-  setTimeout(() => {
-    if (!engine) build();
-  }, 100);
+
+  /* Trigger build immediately and on load */
+  build();
+  window.addEventListener('load', () => { if (!engine) build(); });
 
 
-  /* â”€â”€ Rebuild on window resize â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── Rebuild on window resize or orientation change ─────────────────────── */
   let resizeTimer;
-  window.addEventListener('resize', () => {
+  const handleResize = () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
       if (!engine) return;
@@ -1219,6 +1215,9 @@ function initPhysicsSkills() {
       Matter.Engine.clear(engine);
       engine = null;
       build();
-    }, 300);
-  });
+    }, 250);
+  };
+  window.addEventListener('resize', handleResize);
+  window.addEventListener('orientationchange', handleResize);
 }
+
