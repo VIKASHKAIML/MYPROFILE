@@ -882,13 +882,16 @@ function initPhysicsSkills() {
     color: li.dataset.color || 'SteelBlue',
   }));
 
+  if (SKILLS.length === 0) return;
+
   /* ── Config ────────────────────────────────────────────────── */
-  const BLOCK_H     = 36;           // height of each pill/block
-  const FONT_SIZE   = 13;           // px
-  const H_PAD       = 18;           // horizontal padding inside block
-  const SCENE_H     = 500;          // canvas arena height
-  const CURSOR_R    = 55;           // radius of invisible cursor repeller
-  const RESTITUTION = 0.45;         // restitution for pile stacking
+  const isMobile    = window.innerWidth <= 600;
+  const BLOCK_H     = isMobile ? 32 : 36;          // height of each pill/block
+  const FONT_SIZE   = isMobile ? 11 : 13;          // px font size
+  const H_PAD       = isMobile ? 12 : 18;          // horizontal padding
+  const SCENE_H     = isMobile ? 520 : 500;         // canvas arena height
+  const CURSOR_R    = isMobile ? 40 : 55;          // radius of invisible repeller
+  const RESTITUTION = 0.45;                        // restitution for pile stacking
   const FONT_STR    = `bold ${FONT_SIZE}px "Inter", sans-serif`;
 
   /* ── State ─────────────────────────────────────────────────── */
@@ -905,7 +908,7 @@ function initPhysicsSkills() {
   const _measureCtx = document.createElement('canvas').getContext('2d');
   function blockWidth(label) {
     _measureCtx.font = FONT_STR;
-    return Math.max(_measureCtx.measureText(label).width + H_PAD * 2, 65);
+    return Math.max(_measureCtx.measureText(label).width + H_PAD * 2, isMobile ? 50 : 65);
   }
 
   /* ── Convert client coords → scene-space coords ─────────── */
@@ -934,7 +937,7 @@ function initPhysicsSkills() {
   function build() {
     if (typeof Matter === 'undefined') return;
 
-    const W = scene.offsetWidth || window.innerWidth;
+    const W = scene.offsetWidth || window.innerWidth || 360;
     scene.style.height   = SCENE_H + 'px';
     scene.style.position = 'relative';
     scene.style.overflow = 'hidden';
@@ -968,12 +971,16 @@ function initPhysicsSkills() {
     divEls  = [];
     scene.innerHTML = ''; // clear old divs on rebuild
 
+    const colsCount = Math.max(Math.floor(W / (isMobile ? 95 : 130)), 3);
+
     SKILLS.forEach((skill, i) => {
       const bw  = blockWidth(skill.label);
-      const col = i % 7;
-      const x   = (col / 7) * (W - 120) + 60 + (Math.random() - 0.5) * 30;
+      const col = i % colsCount;
+      const margin = isMobile ? 30 : 60;
+      const availableW = Math.max(W - margin * 2, 200);
+      const x   = (col / colsCount) * availableW + margin + (Math.random() - 0.5) * 20;
       // Spawn Y staggered above top of scene so they tumble down cleanly
-      const y   = -30 - (i * 22);
+      const y   = -20 - (i * 20);
 
       /* Matter body chamfered pill */
       const body = Bodies.rectangle(x, y, bw, BLOCK_H, {
@@ -1016,6 +1023,7 @@ function initPhysicsSkills() {
       scene.appendChild(div);
       divEls.push(div);
     });
+
 
 
     /* Runner */
